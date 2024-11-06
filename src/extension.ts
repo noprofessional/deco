@@ -24,6 +24,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// });
 	// context.subscriptions.push(disposable);
 
+	const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath; // Get the workspace folder path
+	if (!workspaceFolder) {
+		return;
+	}
+
 	const decoData = new DecoData();
 
 	const codeLensProvider = vscode.languages.registerCodeLensProvider(
