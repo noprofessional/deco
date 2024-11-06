@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const decoData = new DecoData();
 
 	const codeLensProvider = vscode.languages.registerCodeLensProvider(
-		{ scheme: 'file', language: 'cpp' }, // You can adjust this to support other languages or all files
+		"*",
 		new MyCodeLensProvider(decoData)
 	);
 	context.subscriptions.push(codeLensProvider);
