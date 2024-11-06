@@ -62,6 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
 			var lineDatas = decoData.get().get(calrel)
 			if (!lineDatas) {
 				lineDatas = new Map<number, string>();
+				decoData.get().set(calrel, lineDatas);
 			}
 			lineDatas.set(line, val);
 		});
