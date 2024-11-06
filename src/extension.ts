@@ -77,26 +77,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 	var intervalId = setInterval(() => {
 		decoData.save();
-	}, 5000); 
+	}, 5000);
 
 	context.subscriptions.push({
-        dispose: () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-                console.log('Repeating timer cleared!');
-            }
-        }
-    });
+		dispose: () => {
+			if (intervalId) {
+				clearInterval(intervalId);
+				console.log('Repeating timer cleared!');
+			}
+		}
+	});
 
 	let disposable3 = vscode.workspace.onDidChangeTextDocument((event) => {
-        // The event contains details about the changes
-        const changes = event.contentChanges;
+		// The event contains details about the changes
+		const changes = event.contentChanges;
 
-        changes.forEach(change => {
-            const startLine = change.range.start.line;
-            const endLine = change.range.end.line;
-			const addlines = change.text.split('\n').length-1;
- 			// console.log("===================================");
+		changes.forEach(change => {
+			const startLine = change.range.start.line;
+			const endLine = change.range.end.line;
+			const addlines = change.text.split('\n').length - 1;
+			// console.log("===================================");
 			// console.log(`Change line ${startLine}-${endLine}`);
 			// console.log(`range offset ${change.rangeOffset}`);
 			// console.log(`range length ${change.rangeLength}`);
@@ -108,10 +108,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const calrel = path.relative(vscode.workspace.workspaceFolders[0].uri.path, event.document.uri.fsPath);
 			decoData.update(calrel, startLine, endLine, addlines)
-        });
-    });
+		});
+	});
 
-    context.subscriptions.push(disposable3);
+	context.subscriptions.push(disposable3);
 }
 
 class DecoData {
@@ -142,11 +142,11 @@ class DecoData {
 
 				// Assuming the .coco file is a JSON file, parse it
 				try {
-					for(const val of Object.entries(JSON.parse(data))){
-						if(val[1] instanceof Object){
-							var innerMap = new Map<number,string>()
-							for(const innerval of Object.entries(val[1])){
-								innerMap.set(parseInt(innerval[0]),innerval[1])
+					for (const val of Object.entries(JSON.parse(data))) {
+						if (val[1] instanceof Object) {
+							var innerMap = new Map<number, string>()
+							for (const innerval of Object.entries(val[1])) {
+								innerMap.set(parseInt(innerval[0]), innerval[1])
 							}
 							this.decoData.set(val[0], innerMap)
 						}
@@ -157,7 +157,8 @@ class DecoData {
 				}
 			});
 		} else {
-			vscode.window.showErrorMessage('.deco file not found in the workspace root.');
+			vscode.window.showInformationMessage('.deco file not found in the workspace root. a default one is created.');
+			this.save();
 		}
 	}
 
@@ -165,7 +166,7 @@ class DecoData {
 		return this.decoData;
 	}
 
-	save(){
+	save() {
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath; // Get the workspace folder path
 		if (!workspaceFolder) {
 			vscode.window.showErrorMessage('No workspace folder found!');
@@ -174,8 +175,8 @@ class DecoData {
 
 		// Construct the path to the .coco file in the top-level directory
 		const cocoFilePath = path.join(workspaceFolder, '.deco');
-		var obj:{[key:string]:any} = {}
-		for(const linedata of this.decoData){
+		var obj: { [key: string]: any } = {}
+		for (const linedata of this.decoData) {
 			obj[linedata[0]] = Object.fromEntries(linedata[1])
 		}
 
@@ -183,35 +184,35 @@ class DecoData {
 		fs.writeFileSync(cocoFilePath, data)
 	}
 
-	update(path:string, delBegLine:number, delEndLine:number, addLines:number){
+	update(path: string, delBegLine: number, delEndLine: number, addLines: number) {
 
 		var lineDatas = this.decoData.get(path)
-		if(!lineDatas){
+		if (!lineDatas) {
 			return;
 		}
 
-		var newLineDatas = new Map<number,string>()
-		for(const [line, label] of lineDatas){
+		var newLineDatas = new Map<number, string>()
+		for (const [line, label] of lineDatas) {
 			var res = ""
 
 			// no deletion happens
-			if(delBegLine == delEndLine){
-				if(line < delEndLine){
+			if (delBegLine == delEndLine) {
+				if (line < delEndLine) {
 					newLineDatas.set(line, label)
 					res = "keep"
-				}else{
+				} else {
 					res = "move"
-					newLineDatas.set(line -(delEndLine - delBegLine) + addLines, label);
+					newLineDatas.set(line - (delEndLine - delBegLine) + addLines, label);
 				}
-			}else{
-				if(line < delBegLine){
+			} else {
+				if (line < delBegLine) {
 					newLineDatas.set(line, label)
 					res = "keep"
-				} else if(line < delEndLine){
+				} else if (line < delEndLine) {
 					res = "delt"
 				} else {
 					res = "move"
-					newLineDatas.set(line -(delEndLine - delBegLine) + addLines, label);
+					newLineDatas.set(line - (delEndLine - delBegLine) + addLines, label);
 				}
 			}
 			// console.log(res + " " + line + "[" + delBegLine + "," + delEndLine+"]+" + addLines)
